@@ -38,7 +38,7 @@ def main():
     # and it will do the rest.
     trainer = pl.Trainer(
         default_root_dir="logs",
-        gpus=(1 if torch.cuda.is_available() else 0),
+        num_nodes=(1 if torch.cuda.is_available() else 0),
         max_epochs=5, # Epochs not always mean better results, but 5 is low, normally
         # 20 is a good number to start with. This is a demo
         fast_dev_run=False,
