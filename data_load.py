@@ -24,7 +24,7 @@ class DataModule(pl.LightningDataModule):
             example["sentence"],
             truncation=True,
             padding="max_length",
-            max_length=512,
+            max_length=256,
         )
 
     def setup(self, stage=None):
@@ -55,5 +55,5 @@ if __name__ == "__main__":
     # Print to check shape
     # Shape is very important when using pytorch
     print(next(iter(data_model.train_dataloader()))["input_ids"].shape)
-    # torch.Size([32, 512])
-    # This is the size expected due to model batch being 32 and max_length being 512
+    # torch.Size([32, 256])
+    # This is the size expected due to model batch being 32 and max_length being 256
