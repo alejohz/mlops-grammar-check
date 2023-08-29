@@ -17,7 +17,9 @@ def main():
     """Main function to train model"""
     cola_data = DataModule()
     bert_model = BertModel()
-
+    # Model checkpoint is a callback that allows us to save the
+    # model after each epoch, this is very useful as we can use
+    # the model that performed the best on the validation set.
     checkpoint_callback = ModelCheckpoint(
         dirpath="./models", monitor="val_loss", mode="min"
     )
