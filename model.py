@@ -12,7 +12,7 @@ from transformers import AutoModel
 # This is a huge advantage, as it saves us a lot of time and boilerplate
 
 class BertModel(pl.LightningModule):
-    def __init__(self, model_name="google/bert_uncased_L-2_H-128_A-2", lr=1e-2):
+    def __init__(self, model_name="google/bert_uncased_L-2_H-128_A-2", lr=1e-7):
         """Initialize BertModel from pretrained bert_uncased model"""
         super(BertModel, self).__init__()
         self.save_hyperparameters()  # Hereditary function from pl.LightningModule
