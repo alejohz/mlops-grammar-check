@@ -2,8 +2,9 @@ import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torchmetrics
-import wandb
 from transformers import AutoModel
+
+import wandb
 
 # This model is bert based, fine tuned for uncased data
 
@@ -38,15 +39,15 @@ class BertModel(pl.LightningModule):
         )
         self.recall_micro_metric = torchmetrics.Recall(average="micro", task=self.task)
 
-    def forward(self, input_ids, attention_mask):
+    def forward(self, input_ids, attention_mask, labels=None):
         """Forward pass for BertModel
         This step feeds data into the next layer of a model
         """
-        outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+        outputs = self.bert(
+            input_ids=input_ids, attention_mask=attention_mask, labels=labels
+        )
 
-        h_cls = outputs.last_hidden_state[:, 0]
-        logits = self.W(h_cls)
-        return logits
+        return outputs
 
     def training_step(self, batch, batch_idx):
         """Training step for BertModel
