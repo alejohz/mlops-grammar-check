@@ -64,7 +64,7 @@ def main():
     # the model that performed the best on the validation set.
     checkpoint_callback = ModelCheckpoint(
         dirpath="./models",
-        filename="best-checkpoint.ckpt",  # Change name to best model
+        filename="best-checkpoint",  # Change name to best model
         monitor="valid/loss",
         mode="min",
     )
