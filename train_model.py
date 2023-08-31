@@ -70,7 +70,7 @@ def main():
     )
     # Early stop is highly recommended, specially when fine tunning.
     early_stopping_callback = EarlyStopping(
-        monitor="val_loss", patience=3, verbose=True, mode="min"
+        monitor="valid/loss", patience=3, verbose=True, mode="min"
     )
     # Here we can see some really pytorch lightning magic, we are
     # using the trainer class to train our model, we are passing
