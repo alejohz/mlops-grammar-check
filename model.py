@@ -19,7 +19,7 @@ class BertModel(pl.LightningModule):
     ):
         """Initialize BertModel from pretrained bert_uncased model"""
         super(BertModel, self).__init__()
-        
+
         self.save_hyperparameters()  # Hereditary function from pl.LightningModule
 
         self.bert = AutoModelForSequenceClassification.from_pretrained(
@@ -28,6 +28,8 @@ class BertModel(pl.LightningModule):
         self.W = nn.Linear(self.bert.config.hidden_size, 2)  # Linear initialization
         self.num_classes = 2  # Binary classification for incorrect or correct
         self.task = "binary"
+        self.val_step_labels = []  # To store validation labels
+        self.val_step_outputs = []  # To store validation outputs
         self.train_accuracy_metric = torchmetrics.Accuracy(task=self.task)
         self.val_accuracy_metric = torchmetrics.Accuracy(task=self.task)
         self.f1_metric = torchmetrics.F1Score(
@@ -45,7 +47,10 @@ class BertModel(pl.LightningModule):
         self.recall_micro_metric = torchmetrics.Recall(average="micro", task=self.task)
 
     def forward(
-        self, input_ids: torch.tensor, attention_mask: torch.tensor, labels=torch.tensor
+        self,
+        input_ids: torch.tensor,
+        attention_mask: torch.tensor,
+        labels = None,
     ):
         """Forward pass for BertModel
         This step feeds data into the next layer of a model
@@ -84,6 +89,8 @@ class BertModel(pl.LightningModule):
             batch["input_ids"], batch["attention_mask"], labels=batch["label"]
         )
         preds = torch.argmax(outputs.logits, 1)
+        self.val_step_outputs.extend(preds)
+        self.val_step_labels.extend(labels)
 
         # Metrics
         valid_acc = self.val_accuracy_metric(preds, labels)
@@ -103,15 +110,20 @@ class BertModel(pl.LightningModule):
         self.log("valid/f1", f1, prog_bar=True)
         return {"labels": labels, "logits": outputs.logits}
 
-    def on_validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self):
         """Validation epoch end for BertModel
         We are using a confusion matrix to see how the model is performing on each
         class, and if there is any class imbalance, we can see it here.
         """
-        labels = torch.cat([x["labels"] for x in outputs])
-        logits = torch.cat([x["logits"] for x in outputs])
-        preds = torch.argmax(logits, 1)
-        wandb.log({"cm": wandb.sklearn.plot_confusion_matrix(labels.numpy(), preds)})
+        wandb.log(
+            {
+                "cm": wandb.sklearn.plot_confusion_matrix(
+                    self.val_step_labels, self.val_step_outputs
+                )
+            }
+        )
+        self.val_step_outputs.clear()  # to free memory
+        self.val_step_labels.clear()
 
     # Here we are skipping the test step, as it is not necessary for this project
     # but for a production model, it is desirable to have a test step
