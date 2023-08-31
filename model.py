@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torchmetrics
-from transformers import AutoModel
+from transformers import AutoModelForSequenceClassification
 
 import wandb
 
@@ -19,9 +19,12 @@ class BertModel(pl.LightningModule):
     ):
         """Initialize BertModel from pretrained bert_uncased model"""
         super(BertModel, self).__init__()
+        
         self.save_hyperparameters()  # Hereditary function from pl.LightningModule
 
-        self.bert = AutoModel.from_pretrained(model_name)
+        self.bert = AutoModelForSequenceClassification.from_pretrained(
+            model_name, num_labels=2
+        )
         self.W = nn.Linear(self.bert.config.hidden_size, 2)  # Linear initialization
         self.num_classes = 2  # Binary classification for incorrect or correct
         self.task = "binary"
