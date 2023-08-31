@@ -1,12 +1,17 @@
 import pytorch_lightning as pl
 import torch
+from dotenv import load_dotenv
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
 from data_load import DataModule
 from model import BertModel
 
-# You may be wodering why we are training a model if insinde model.py
+load_dotenv()
+# Adding env variable TOKENIZERS_PARALLELISM and setting as false to avoid deadlocks
+# when forking processes
+torch.set_default_dtype(torch.float32)
+# You may be wodering why we are training a model if inside model.py
 # it says from pre trained or already trained. This is because we are
 # fine tuning the model to our data, this is a very important step
 # as it allows us to use the model for our specific use case, in this
@@ -38,8 +43,9 @@ def main():
     # and it will do the rest.
     trainer = pl.Trainer(
         default_root_dir="logs",
-        num_nodes=(1 if torch.cuda.is_available() else 0),
-        max_epochs=5, # Epochs not always mean better results, but 5 is low, normally
+        accelerator="cpu",
+        # Had to use CPU as metal has no support for float64
+        max_epochs=5,  # Epochs not always mean better results, but 5 is low, normally
         # 20 is a good number to start with. This is a demo
         fast_dev_run=False,
         logger=pl.loggers.TensorBoardLogger("logs/", name="cola", version=1),
