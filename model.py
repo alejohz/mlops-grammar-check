@@ -21,8 +21,8 @@ class BertModel(pl.LightningModule):
         self.bert = AutoModel.from_pretrained(model_name)
         self.W = nn.Linear(self.bert.config.hidden_size, 2)  # Linear initialization
         self.num_classes = 2  # Binary classification for incorrect or correct
-        self.train_accuracy_metric = torchmetrics.Accuracy()
-        self.val_accuracy_metric = torchmetrics.Accuracy()
+        self.train_accuracy_metric = torchmetrics.Accuracy(task="binary")
+        self.val_accuracy_metric = torchmetrics.Accuracy(task="binary")
         self.f1_metric = torchmetrics.F1(num_classes=self.num_classes)
         self.precision_macro_metric = torchmetrics.Precision(
             average="macro", num_classes=self.num_classes
