@@ -95,7 +95,7 @@ class BertModel(pl.LightningModule):
         self.log("valid/f1", f1, prog_bar=True)
         return {"labels": labels, "logits": outputs.logits}
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self, outputs):
         """Validation epoch end for BertModel
         We are using a confusion matrix to see how the model is performing on each
         class, and if there is any class imbalance, we can see it here.
