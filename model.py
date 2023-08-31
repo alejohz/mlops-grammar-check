@@ -14,7 +14,9 @@ import wandb
 
 
 class BertModel(pl.LightningModule):
-    def __init__(self, model_name="google/bert_uncased_L-2_H-128_A-2", lr=1e-7):
+    def __init__(
+        self, model_name: str = "google/bert_uncased_L-2_H-128_A-2", lr: float = 1e-7
+    ):
         """Initialize BertModel from pretrained bert_uncased model"""
         super(BertModel, self).__init__()
         self.save_hyperparameters()  # Hereditary function from pl.LightningModule
@@ -39,7 +41,9 @@ class BertModel(pl.LightningModule):
         )
         self.recall_micro_metric = torchmetrics.Recall(average="micro", task=self.task)
 
-    def forward(self, input_ids, attention_mask, labels=None):
+    def forward(
+        self, input_ids: torch.tensor, attention_mask: torch.tensor, labels=torch.tensor
+    ):
         """Forward pass for BertModel
         This step feeds data into the next layer of a model
         """
@@ -49,7 +53,7 @@ class BertModel(pl.LightningModule):
 
         return outputs
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: torch.Tensor, batch_idx):
         """Training step for BertModel
         This step gets feedback from the forward pass in the way of cross entropy
         (due to being binary classification) and logs it as train loss,
