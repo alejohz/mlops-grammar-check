@@ -1,16 +1,21 @@
+import logging
+
+import hydra
 import pandas as pd
 import pytorch_lightning as pl
 import torch
-import wandb
 from dotenv import load_dotenv
+from omegaconf.omegaconf import OmegaConf, DictConfig
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import WandbLogger
 
+import wandb
 from data_load import DataModule
 from model import BertModel
 
 load_dotenv()
+
 # Adding env variable TOKENIZERS_PARALLELISM and setting as false to avoid deadlocks
 # when forking processes
 torch.set_default_dtype(torch.float32)
@@ -19,6 +24,7 @@ torch.set_default_dtype(torch.float32)
 # fine tuning the model to our data, this is a very important step
 # as it allows us to use the model for our specific use case, in this
 # case, the model is being fine tuned to the HF COLA dataset.
+logger = logging.getLogger(__name__)
 
 
 # Adding a callback to log samples to wandb, we need to understand where the model is
@@ -55,10 +61,16 @@ class SamplesVisualisationLogger(pl.Callback):
         )
 
 
-def main():
+@hydra.main(config_path="./configs", config_name="config", version_base=None)
+def main(cfg: DictConfig) -> None:
     """Main function to train model"""
-    cola_data = DataModule()
-    bert_model = BertModel()
+    logger.info(OmegaConf.to_yaml(cfg, resolve=True))
+    logger.info(f"Using the model: {cfg.model.name}")
+    logger.info(f"Using the tokenizer: {cfg.model.tokenizer}")
+    cola_data = DataModule(
+        cfg.model.tokenizer, cfg.processing.batch_size, cfg.processing.max_length
+    )
+    bert_model = BertModel(cfg.model.name)
     # Model checkpoint is a callback that allows us to save the
     # model after each epoch, this is very useful as we can use
     # the model that performed the best on the validation set.
@@ -86,8 +98,8 @@ def main():
         default_root_dir="logs",
         accelerator="cpu",
         # Had to use CPU as metal has no support for float64
-        max_epochs=5,  # Epochs not always mean better results, but 5 is low, normally
-        # 20 is a good number to start with. This is a demo
+        max_epochs=cfg.training.max_epochs,  # Epochs not always mean better results,
+        # but 5 is low, normally, 20 is a good number to start with. This is a demo
         fast_dev_run=False,
         logger=wandb_logger,
         callbacks=[
@@ -95,11 +107,15 @@ def main():
             SamplesVisualisationLogger(cola_data),
             early_stopping_callback,
         ],
-        log_every_n_steps=10,  # This is way too high, specially on such a pretrained
-        # model, but this is a demo
-        deterministic=True,  # For reproducibility
+        log_every_n_steps=cfg.training.log_every_n_steps,  # This is way too high,
+        # specially on such a pretrained model, but this is a demo
+        deterministic=cfg.training.deterministic,  # For reproducibility
+        limit_train_batches=cfg.training.limit_train_batches,
+        # Reduce data size for testing
+        limit_val_batches=cfg.training.limit_val_batches,
     )
     trainer.fit(bert_model, cola_data)
+    wandb.finish()
 
 
 if __name__ == "__main__":
