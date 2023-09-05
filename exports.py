@@ -10,12 +10,12 @@ from model import BertModel
 logger = logging.getLogger(__name__)
 
 
-@hydra.main(config_path="./configs", config_name="config")
+@hydra.main(config_path="./configs", config_name="config", version_base=None)
 def convert_model(cfg: DictConfig):
     """Convert the model into ONNX format."""
     os.environ["TOKENIZERS_PARALLELISM"] = str(cfg.model.parallelism)
     root_dir = hydra.utils.get_original_cwd()
-    model_path = f"{root_dir}/models/best-checkpoint-v1.ckpt"
+    model_path = f"{root_dir}/models/best-checkpoint.ckpt"
     logger.info(f"Loading pre-trained model from: {model_path}")
     bert_model = BertModel.load_from_checkpoint(model_path)
 
