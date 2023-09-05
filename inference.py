@@ -19,6 +19,7 @@ class ColaPredictor:
         self.softmax = torch.nn.Softmax(dim=0)
         self.labels = ["unacceptable", "acceptable"]
 
+    @timing
     def predict(self, text):
         """Predict the label of the text."""
         inference_sample = {"sentence": text}
