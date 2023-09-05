@@ -110,9 +110,9 @@ def main(cfg: DictConfig) -> None:
         log_every_n_steps=cfg.training.log_every_n_steps,  # This is way too high,
         # specially on such a pretrained model, but this is a demo
         deterministic=cfg.training.deterministic,  # For reproducibility
-        limit_train_batches=cfg.training.limit_train_batches,
+        # limit_train_batches=cfg.training.limit_train_batches,
         # Reduce data size for testing
-        limit_val_batches=cfg.training.limit_val_batches,
+        # limit_val_batches=cfg.training.limit_val_batches,
     )
     trainer.fit(bert_model, cola_data)
     wandb.finish()
