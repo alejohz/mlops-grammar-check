@@ -79,6 +79,7 @@ def main(cfg: DictConfig) -> None:
         filename="best-checkpoint",  # Change name to best model
         monitor="valid/loss",
         mode="min",
+        save_top_k=1,
     )
     # Early stop is highly recommended, specially when fine tunning.
     early_stopping_callback = EarlyStopping(
