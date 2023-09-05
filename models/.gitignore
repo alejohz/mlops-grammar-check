@@ -1,1 +1,3 @@
 /best-checkpoint-v1.ckpt
+/model.onnx
+/best-checkpoint.ckpt
