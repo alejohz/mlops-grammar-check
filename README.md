@@ -18,3 +18,4 @@ This repo uses [DVC](https://dvc.org/) for model versioning and remote storage o
 
 ### Docker & FastAPI
 This repo uses Docker and FastAPI to deploy a usable model into a very basic a simple API made with FastAPI.
+The image is pushed to dockerhub [here](https://hub.docker.com/layers/alejohz/inference/latest/images/sha256-ebd3d0a9377ff0cb8256f30bd358a7f8eab03ab09a33ea10b8de117c6e722c40?context=repo).
