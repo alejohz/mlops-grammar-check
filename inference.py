@@ -39,7 +39,7 @@ class ColaONNXPredictor:
     def __init__(self, model_path):
         self.ort_session = ort.InferenceSession(model_path)
         self.processor = DataModule()
-        self.lables = ["unacceptable", "acceptable"]
+        self.labels = ["unacceptable", "acceptable"]
 
     @timing
     def predict(self, text):
@@ -53,7 +53,7 @@ class ColaONNXPredictor:
         ort_outs = self.ort_session.run(None, ort_inputs)
         scores = softmax(ort_outs[0])[0]
         predictions = []
-        for score, label in zip(scores, self.lables):
+        for score, label in zip(scores, self.labels):
             predictions.append({"label": label, "score": score})
         return predictions
 
