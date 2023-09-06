@@ -11,3 +11,5 @@ hydra-colorlog==1.2.0
 dvc==3.17.0
 onnx==1.14.1
 onnxruntime==1.15.1
+fastapi==0.103.0
+uvicorn==0.23.2
