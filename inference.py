@@ -64,7 +64,7 @@ if __name__ == "__main__":
         "A boy is sitting alone on the bench",  # acceptable
     ]
     for sentence in sentences:
-        predictor = ColaPredictor("./models/best-checkpoint-v1.ckpt")
+        predictor = ColaPredictor("./models/best-checkpoint.ckpt")
         print(predictor.predict(sentence))
 
     sentence = "The boy is sitting on a bench"
