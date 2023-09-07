@@ -1,6 +1,7 @@
 name: Build Docker image on Dockerfile change
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main

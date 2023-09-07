@@ -1,6 +1,7 @@
 name: Pull model and test inference
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
