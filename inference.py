@@ -9,6 +9,7 @@ from utils import timing
 import wandb
 import hydra
 from omegaconf import DictConfig
+from hydra.utils import get_original_cwd
 
 
 class ColaPredictor:
@@ -61,7 +62,7 @@ class ColaONNXPredictor:
         return predictions
 
 
-@hydra.main(config_path="./configs", config_name="config")
+@hydra.main(config_path="./configs", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
     sentences = [
         "The boys is sitting on the bench",  # unacceptable
@@ -74,8 +75,8 @@ def main(cfg: DictConfig) -> None:
         tags=cfg.wandb.tags,
 
     )
-    predictor = ColaPredictor("./models/best-checkpoint.ckpt")
-    onnx_predictor = ColaONNXPredictor("./models/model.onnx")
+    predictor = ColaPredictor(get_original_cwd() + "/models/best-checkpoint.ckpt")
+    onnx_predictor = ColaONNXPredictor(get_original_cwd() + "/models/model.onnx")
     for sentence in sentences:
         prediction, time = predictor.predict(sentence)
         wandb.log(
