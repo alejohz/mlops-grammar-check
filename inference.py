@@ -62,13 +62,11 @@ if __name__ == "__main__":
     sentences = [
         "The boys is sitting on the bench",  # unacceptable
         "A boy is sitting alone on the bench",  # acceptable
-    ]
+    ] * 10
     for sentence in sentences:
         predictor = ColaPredictor("./models/best-checkpoint.ckpt")
         print(predictor.predict(sentence))
 
-    sentence = "The boy is sitting on a bench"
     predictor = ColaONNXPredictor("./models/model.onnx")
-    print(predictor.predict(sentence))
     for sentence in sentences:
         predictor.predict(sentence)
