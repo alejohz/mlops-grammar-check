@@ -17,6 +17,13 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
+        cache: 'pip'
+    - name: Install requirements
+      run: pip install -r requirements_app.txt
+    - name: Login to WandB
+      env:
+        WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+      run: wandb login $WANDB_API_KEY
     - uses: iterative/setup-dvc@v1
     - name: Pull model
       env:
@@ -24,6 +31,5 @@ jobs:
       run: |
         dvc pull models/model.onnx.dvc
         dvc pull models/best-checkpoint.ckpt.dvc
-        pip install -r requirements_app.txt
     - name: Run inference
-      run: python inference.py
+      run: python inference.py --tags ${{ github.event.head_commit.message }}
