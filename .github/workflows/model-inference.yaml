@@ -1,0 +1,29 @@
+name: Pull model and test inference
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'models/**'
+
+jobs:
+  pull_model:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - uses: iterative/setup-dvc@v1
+    - name: Pull model
+      env:
+        GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+      run: |
+        dvc pull models/model.onnx.dvc
+        dvc pull models/best-checkpoint.ckpt.dvc
+        pip install -r requirements_app.txt
+    - name: Run inference
+      run: python inference.py
