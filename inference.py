@@ -6,6 +6,7 @@ from scipy.special import softmax
 from data_load import DataModule
 from model import BertModel
 from utils import timing
+import wandb
 
 
 class ColaPredictor:
@@ -63,10 +64,28 @@ if __name__ == "__main__":
         "The boys is sitting on the bench",  # unacceptable
         "A boy is sitting alone on the bench",  # acceptable
     ] * 10
+    wandb.init(project="mlops-testing", entity="alejohz", job_type="inference")
+    predictor = ColaPredictor("./models/best-checkpoint.ckpt")
+    onnx_predictor = ColaONNXPredictor("./models/model.onnx")
     for sentence in sentences:
-        predictor = ColaPredictor("./models/best-checkpoint.ckpt")
-        print(predictor.predict(sentence))
-
-    predictor = ColaONNXPredictor("./models/model.onnx")
-    for sentence in sentences:
-        predictor.predict(sentence)
+        prediction, time = predictor.predict(sentence)
+        wandb.log(
+            {
+                "prediction": prediction[0]["label"],
+                "score": prediction[0]["score"],
+                "sentence": sentence,
+                "time": time,
+                "type": "ckpt"
+            }
+        )
+        onnx_prediction, onnx_time = onnx_predictor.predict(sentence)
+        wandb.log(
+            {
+                "prediction": onnx_prediction[0]["label"],
+                "score": onnx_prediction[0]["score"],
+                "sentence": sentence,
+                "time": onnx_time,
+                "type": "onnx"
+            }
+        )
+    wandb.finish()
