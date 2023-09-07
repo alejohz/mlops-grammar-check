@@ -7,6 +7,8 @@ from data_load import DataModule
 from model import BertModel
 from utils import timing
 import wandb
+import hydra
+from omegaconf import DictConfig
 
 
 class ColaPredictor:
@@ -59,12 +61,19 @@ class ColaONNXPredictor:
         return predictions
 
 
-if __name__ == "__main__":
+@hydra.main(config_path="./configs", config_name="config")
+def main(cfg: DictConfig) -> None:
     sentences = [
         "The boys is sitting on the bench",  # unacceptable
         "A boy is sitting alone on the bench",  # acceptable
-    ] * 10
-    wandb.init(project="mlops-testing", entity="alejohz", job_type="inference")
+    ] * cfg.inference.sentences_multiplier
+    wandb.init(
+        project=cfg.wandb.project_name,
+        entity=cfg.wandb.entity,
+        job_type=cfg.inference.job_type,
+        tags=cfg.wandb.tags,
+
+    )
     predictor = ColaPredictor("./models/best-checkpoint.ckpt")
     onnx_predictor = ColaONNXPredictor("./models/model.onnx")
     for sentence in sentences:
@@ -75,7 +84,7 @@ if __name__ == "__main__":
                 "score": prediction[0]["score"],
                 "sentence": sentence,
                 "time": time,
-                "type": "ckpt"
+                "type": "ckpt",
             }
         )
         onnx_prediction, onnx_time = onnx_predictor.predict(sentence)
@@ -85,7 +94,11 @@ if __name__ == "__main__":
                 "score": onnx_prediction[0]["score"],
                 "sentence": sentence,
                 "time": onnx_time,
-                "type": "onnx"
+                "type": "onnx",
             }
         )
     wandb.finish()
+
+
+if __name__ == "__main__":
+    main()

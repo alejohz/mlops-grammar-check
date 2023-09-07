@@ -2,5 +2,7 @@ defaults:
   - model: default
   - processing: default
   - training: default
+  - inference: default
+  - wandb: default
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
