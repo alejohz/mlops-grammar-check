@@ -8,3 +8,5 @@ hydra_colorlog
 onnxruntime
 fastapi
 uvicorn
+wandb
+dvc

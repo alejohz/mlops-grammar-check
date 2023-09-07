@@ -6,6 +6,10 @@ from scipy.special import softmax
 from data_load import DataModule
 from model import BertModel
 from utils import timing
+import wandb
+import hydra
+from omegaconf import DictConfig
+from hydra.utils import get_original_cwd
 
 
 class ColaPredictor:
@@ -58,17 +62,44 @@ class ColaONNXPredictor:
         return predictions
 
 
-if __name__ == "__main__":
+@hydra.main(config_path="./configs", config_name="config", version_base=None)
+def main(cfg: DictConfig) -> None:
     sentences = [
         "The boys is sitting on the bench",  # unacceptable
         "A boy is sitting alone on the bench",  # acceptable
-    ]
-    for sentence in sentences:
-        predictor = ColaPredictor("./models/best-checkpoint-v1.ckpt")
-        print(predictor.predict(sentence))
+    ] * cfg.inference.sentences_multiplier
+    wandb.init(
+        project=cfg.wandb.project_name,
+        entity=cfg.wandb.entity,
+        job_type=cfg.inference.job_type,
+        tags=cfg.wandb.tags,
 
-    sentence = "The boy is sitting on a bench"
-    predictor = ColaONNXPredictor("./models/model.onnx")
-    print(predictor.predict(sentence))
+    )
+    predictor = ColaPredictor(get_original_cwd() + "/models/best-checkpoint.ckpt")
+    onnx_predictor = ColaONNXPredictor(get_original_cwd() + "/models/model.onnx")
     for sentence in sentences:
-        predictor.predict(sentence)
+        prediction, time = predictor.predict(sentence)
+        wandb.log(
+            {
+                "prediction": prediction[0]["label"],
+                "score": prediction[0]["score"],
+                "sentence": sentence,
+                "time": time,
+                "type": "ckpt",
+            }
+        )
+        onnx_prediction, onnx_time = onnx_predictor.predict(sentence)
+        wandb.log(
+            {
+                "prediction": onnx_prediction[0]["label"],
+                "score": onnx_prediction[0]["score"],
+                "sentence": sentence,
+                "time": onnx_time,
+                "type": "onnx",
+            }
+        )
+    wandb.finish()
+
+
+if __name__ == "__main__":
+    main()

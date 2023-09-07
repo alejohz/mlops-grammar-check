@@ -15,4 +15,4 @@ async def home():
 @app.get("/predict/")
 async def get_prediction(text: str):
     prediction = predictor.predict(text)
-    return str(prediction[0])
+    return str(prediction[0][0])
